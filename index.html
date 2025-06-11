@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -70,8 +70,8 @@
             cursor: pointer;
             transition: background-color 0.2s, transform 0.2s;
             flex-grow: 1;
-            max-width: 320px; /* Increased width for more text */
-            line-height: 1.4; /* Improved line spacing */
+            max-width: 320px;
+            line-height: 1.4;
         }
         button:hover {
             background-color: #0056b3;
@@ -82,7 +82,7 @@
             cursor: not-allowed;
             transform: none;
         }
-        button small { /* Style for the criteria text inside buttons */
+        button small {
             font-size: 0.8em;
             font-weight: 400;
             opacity: 0.9;
@@ -112,14 +112,14 @@
         .note ul { padding-left: 20px; margin: 10px 0 0 0; }
         .note li { margin-bottom: 5px; }
         footer { margin-top: 30px; font-size: 0.8em; color: #888; }
+        footer a { color: #007bff; text-decoration: none; font-weight: 500; font-size: 1.1em; }
+        footer a:hover { text-decoration: underline; }
 
-        /* Navigation Controls */
         #nav-controls { margin-top: 25px; padding-top: 20px; border-top: 1px solid #eef2f5; }
         #back-btn { background-color: #6c757d; max-width: 150px; }
         #back-btn:hover { background-color: #5a6268; }
         #back-btn:disabled { background-color: #e9ecef; }
 
-        /* Calculator Styles */
         .calculator { margin-top: 20px; text-align: left; }
         .calc-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eef2f5; }
         .calc-row label { font-weight: 500; }
@@ -147,24 +147,10 @@
             <div id="step-3c-clarification" class="pathway-step"><h2>Clarification: Transition to Main Pathway</h2><p>The patient's troponins are normal and/or chest pain has resolved. Although the initial ECG was concerning, the absence of myocardial injury (negative troponins) means they can now be risk-stratified using the main clinical decision pathway.</p><div class="options"><button onclick="navigateTo('step-4-main-pathway-entry')">Continue to Main Pathway</button></div></div>
             <div id="outcome-other-diagnoses" class="pathway-step outcome-observe"><h2>Outcome: Consider Other Diagnoses</h2><p>Work up other causes of chest pain with ischemic ECG changes (PE, dissection, pericarditis, sepsis, etc.).</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
             <div id="outcome-admit-nstemi" class="pathway-step outcome-admit"><h2>Outcome: High-Risk NSTE-ACS</h2><p>Consult Cardiology fellow for recommendations, consideration of LHC/PCI, and subsequent admission.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
-            
             <div id="step-4-main-pathway-entry" class="pathway-step"><h2>Step 4: Main Clinical Decision Pathway</h2><p>The patient has no STEMI and no other concerning ischemic ECG changes. They are a candidate for the main pathway using hs-cTn and the HEART Score.</p><div class="options"><button onclick="navigateTo('step-4a-symptom-onset')">Begin Stratification</button></div></div>
-            
             <div id="step-4a-symptom-onset" class="pathway-step"><h2>Step 4a: Symptom Onset</h2><p>Did symptoms start <strong>≥ 3 hours</strong> before the initial hs-cTn was drawn?</p><div class="options"><button onclick="navigateTo('step-4b-single-draw')">Yes (≥ 3 hours)</button><button onclick="navigateTo('step-4c-delta-troponin-criteria')">No (< 3 hours) - Proceed to Delta Troponin Pathway</button></div></div>
-            
             <div id="step-4b-single-draw" class="pathway-step"><h2>Single-Draw Pathway</h2><p>Is the initial hs-cTn <strong>< 3 ng/L</strong>?</p><div class="options"><button onclick="navigateTo('outcome-discharge-14day')">Yes (hs-cTn < 3)</button><button onclick="navigateTo('step-4c-delta-troponin-criteria')">No (hs-cTn ≥ 3) - Proceed to Delta Troponin Pathway</button></div><div class="note">A "Yes" meets Rapid Rule-Out criteria for this specific pathway. A "No" fails the single-draw rule-out, and the patient requires a 2-hour hs-cTn.</div></div>
-            
-            <!-- REVISED Step 4c -->
-            <div id="step-4c-delta-troponin-criteria" class="pathway-step">
-                <h2>Step 4b: Evaluate initial and delta troponin (2 hour) to determine next step</h2>
-                <p>Which criteria do the initial and 2-hour hs-cTn results meet?</p>
-                <div class="options">
-                    <button onclick="navigateTo('step-4d-heart-calculator')">Rapid Rule-Out<br><small>Initial hs-cTn < 3 ng/L AND Delta < 3 ng/L</small></button>
-                    <button onclick="navigateTo('step-4d-heart-calculator')">Gray Zone<br><small>All Other Results</small></button>
-                    <button onclick="navigateTo('step-4d-heart-calculator')">Myocardial Injury<br><small>Initial hs-cTn > 88 ng/L OR Delta ≥ 22 ng/L</small></button>
-                </div>
-            </div>
-
+            <div id="step-4c-delta-troponin-criteria" class="pathway-step"><h2>Step 4b: Evaluate initial and delta troponin (2 hour) to determine next step</h2><p>Which criteria do the hs-cTn results meet?</p><div class="options"><button onclick="navigateTo('step-4d-heart-calculator')">Rapid Rule-Out<br><small>Initial < 3 ng/L AND Delta < 3 ng/L</small></button><button onclick="navigateTo('step-4d-heart-calculator')">Gray Zone<br><small>All Other Results</small></button><button onclick="navigateTo('step-4d-heart-calculator')">Myocardial Injury<br><small>Initial > 88 ng/L OR Delta ≥ 22 ng/L</small></button></div></div>
             <div id="step-4d-heart-calculator" class="pathway-step"><h2>Step 4c: HEART Score Calculator</h2><p>Calculate the patient's HEART score to confirm disposition.</p><div class="calculator"><div class="calc-row"><label for="history">History</label><select id="history" onchange="calculateHeartScore()"><option value="0">Slightly suspicious</option><option value="1">Moderately suspicious</option><option value="2">Highly suspicious</option></select></div><div class="calc-row"><label for="ecg">ECG</label><select id="ecg" onchange="calculateHeartScore()"><option value="0">Normal</option><option value="1">Non-specific repolarization disturbance</option><option value="2">Significant ST deviation</option></select></div><div class="calc-row"><label for="age">Age</label><select id="age" onchange="calculateHeartScore()"><option value="0">< 45 years</option><option value="1">45-64 years</option><option value="2">≥ 65 years</option></select></div><div class="calc-row"><label for="risk">Risk Factors</label><select id="risk" onchange="calculateHeartScore()"><option value="0">No known risk factors</option><option value="1">1-2 risk factors</option><option value="2">≥ 3 risk factors or atherosclerotic disease</option></select></div><div class="calc-row"><label for="troponin">Troponin</label><select id="troponin" onchange="calculateHeartScore()"><option value="0">≤ Normal limit</option><option value="1">> 1x but < 3x normal limit</option><option value="2">≥ 3x normal limit</option></select></div></div><div id="score-display">Total Score: <span id="total-score">0</span></div><div class="options"><button id="heart-continue-btn" onclick="navigateByHeartScore()" disabled>Continue Based on Score</button></div></div>
             <div id="step-4e-shared-decision" class="pathway-step"><h2>Intermediate Risk Pathway</h2><p>The patient has an <strong>Intermediate Risk</strong> HEART score (4-6). Engage in Shared Decision Making about the next steps.</p><div class="options"><button onclick="navigateTo('outcome-discharge-14day')">Decision: Discharge</button><button onclick="navigateTo('step-5-obs-check')">Decision: Admit/Observe</button></div></div>
             <div id="outcome-discharge-14day" class="pathway-step outcome-discharge"><h2>Outcome: Low Risk / Discharge</h2><p>Patient is low risk. <strong>Discharge home</strong> with Primary Care (PDC) follow-up within 14 days.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
@@ -185,6 +171,10 @@
         </div>
 
         <footer>
+            <p>
+                <!-- The direct link to your PDF is now included -->
+                <a href="https://raw.githubusercontent.com/praxeo/chest-pain-pathway-UED/main/ED%20Chest%20Pain%20Pathway%20Jun%202025.pdf" target="_blank" rel="noopener noreferrer">View Original PDF Pathway</a>
+            </p>
             <p>This is an interactive tool based on the "ED Chest Pain Pathway" document. It is for educational and demonstrative purposes only and should not be used for clinical decision-making. Always refer to the official, approved hospital protocols.</p>
         </footer>
     </div>
