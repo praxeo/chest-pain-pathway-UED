@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ED Chest Pain Pathway v7</title>
+    <title>ED Chest Pain Pathway v8</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f7f9;
             color: #333;
             display: flex;
@@ -27,10 +27,11 @@
             text-align: center;
         }
         h1 {
-            color: #1a253c;
-            border-bottom: 2px solid #eef2f5;
+            color: #1A5632; /* UAB Green */
+            border-bottom: 3px solid #D1B464; /* UAB Gold */
             padding-bottom: 15px;
             margin-top: 0;
+            font-weight: 700;
         }
         .pathway-step {
             display: none;
@@ -46,7 +47,8 @@
         }
         .pathway-step h2 {
             margin-top: 0;
-            color: #0056b3;
+            color: #1A5632; /* UAB Green */
+            font-weight: 700;
         }
         .pathway-step p {
             font-size: 1.1em;
@@ -60,13 +62,14 @@
             justify-content: center;
         }
         button {
-            background-color: #007bff;
+            background-color: #1A5632; /* UAB Green */
             color: white;
             border: none;
             padding: 12px 24px;
             border-radius: 6px;
             font-size: 1em;
             font-weight: 500;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.2s;
             flex-grow: 1;
@@ -74,7 +77,7 @@
             line-height: 1.4;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #144529; /* Darker UAB Green */
             transform: translateY(-2px);
         }
         button:disabled {
@@ -95,9 +98,9 @@
         button.restart-btn:hover {
             background-color: #5a6268;
         }
-        .outcome-discharge { background-color: #d4edda; border-color: #c3e6cb; }
-        .outcome-admit { background-color: #f8d7da; border-color: #f5c6cb; }
-        .outcome-observe { background-color: #fff3cd; border-color: #ffeeba; }
+        .outcome-discharge { background-color: #d1e7dd; border-color: #a3c9a8; } /* Light Green */
+        .outcome-admit { background-color: #f8d7da; border-color: #f5c6cb; } /* Standard Red */
+        .outcome-observe { background-color: #fff3cd; border-color: #ffeeba; } /* Light Gold/Yellow */
         strong { color: #1a253c; }
         .note {
             font-size: 0.9em;
@@ -112,7 +115,7 @@
         .note ul { padding-left: 20px; margin: 10px 0 0 0; }
         .note li { margin-bottom: 5px; }
         footer { margin-top: 30px; font-size: 0.8em; color: #888; }
-        footer a { color: #007bff; text-decoration: none; font-weight: 500; font-size: 1.1em; }
+        footer a { color: #1A5632; text-decoration: none; font-weight: 500; font-size: 1.1em; }
         footer a:hover { text-decoration: underline; }
 
         #nav-controls { margin-top: 25px; padding-top: 20px; border-top: 1px solid #eef2f5; }
@@ -123,11 +126,11 @@
         .calculator { margin-top: 20px; text-align: left; }
         .calc-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eef2f5; }
         .calc-row label { font-weight: 500; }
-        .calc-row select { padding: 8px; border-radius: 4px; border: 1px solid #ced4da; width: 60%; }
+        .calc-row select { padding: 8px; border-radius: 4px; border: 1px solid #ced4da; width: 60%; font-family: 'Inter', sans-serif; }
         #score-display { margin-top: 20px; font-size: 1.5em; font-weight: bold; }
         #score-display span { display: inline-block; padding: 10px 20px; border-radius: 8px; color: #fff; }
-        .score-low { background-color: #28a745; }
-        .score-intermediate { background-color: #ffc107; color: #333 !important;}
+        .score-low { background-color: #1A5632; } /* UAB Green */
+        .score-intermediate { background-color: #D1B464; color: #333 !important;} /* UAB Gold */
         .score-high { background-color: #dc3545; }
     </style>
 </head>
@@ -150,10 +153,29 @@
             <div id="step-4-main-pathway-entry" class="pathway-step"><h2>Step 4: Main Clinical Decision Pathway</h2><p>The patient has no STEMI and no other concerning ischemic ECG changes. They are a candidate for the main pathway using hs-cTn and the HEART Score.</p><div class="options"><button onclick="navigateTo('step-4a-symptom-onset')">Begin Stratification</button></div></div>
             <div id="step-4a-symptom-onset" class="pathway-step"><h2>Step 4a: Symptom Onset</h2><p>Did symptoms start <strong>≥ 3 hours</strong> before the initial hs-cTn was drawn?</p><div class="options"><button onclick="navigateTo('step-4b-single-draw')">Yes (≥ 3 hours)</button><button onclick="navigateTo('step-4c-delta-troponin-criteria')">No (< 3 hours) - Proceed to Delta Troponin Pathway</button></div></div>
             <div id="step-4b-single-draw" class="pathway-step"><h2>Single-Draw Pathway</h2><p>Is the initial hs-cTn <strong>< 3 ng/L</strong>?</p><div class="options"><button onclick="navigateTo('outcome-discharge-14day')">Yes (hs-cTn < 3)</button><button onclick="navigateTo('step-4c-delta-troponin-criteria')">No (hs-cTn ≥ 3) - Proceed to Delta Troponin Pathway</button></div><div class="note">A "Yes" meets Rapid Rule-Out criteria for this specific pathway. A "No" fails the single-draw rule-out, and the patient requires a 2-hour hs-cTn.</div></div>
-            <div id="step-4c-delta-troponin-criteria" class="pathway-step"><h2>Step 4b: Evaluate initial and delta troponin (2 hour) to determine next step</h2><p>Which criteria do the hs-cTn results meet?</p><div class="options"><button onclick="navigateTo('step-4d-heart-calculator')">Rapid Rule-Out<br><small>Initial < 3 ng/L AND Delta < 3 ng/L</small></button><button onclick="navigateTo('step-4d-heart-calculator')">Gray Zone<br><small>All Other Results</small></button><button onclick="navigateTo('step-4d-heart-calculator')">Myocardial Injury<br><small>Initial > 88 ng/L OR Delta ≥ 22 ng/L</small></button></div></div>
-            <div id="step-4d-heart-calculator" class="pathway-step"><h2>Step 4c: HEART Score Calculator</h2><p>Calculate the patient's HEART score to confirm disposition.</p><div class="calculator"><div class="calc-row"><label for="history">History</label><select id="history" onchange="calculateHeartScore()"><option value="0">Slightly suspicious</option><option value="1">Moderately suspicious</option><option value="2">Highly suspicious</option></select></div><div class="calc-row"><label for="ecg">ECG</label><select id="ecg" onchange="calculateHeartScore()"><option value="0">Normal</option><option value="1">Non-specific repolarization disturbance</option><option value="2">Significant ST deviation</option></select></div><div class="calc-row"><label for="age">Age</label><select id="age" onchange="calculateHeartScore()"><option value="0">< 45 years</option><option value="1">45-64 years</option><option value="2">≥ 65 years</option></select></div><div class="calc-row"><label for="risk">Risk Factors</label><select id="risk" onchange="calculateHeartScore()"><option value="0">No known risk factors</option><option value="1">1-2 risk factors</option><option value="2">≥ 3 risk factors or atherosclerotic disease</option></select></div><div class="calc-row"><label for="troponin">Troponin</label><select id="troponin" onchange="calculateHeartScore()"><option value="0">≤ Normal limit</option><option value="1">> 1x but < 3x normal limit</option><option value="2">≥ 3x normal limit</option></select></div></div><div id="score-display">Total Score: <span id="total-score">0</span></div><div class="options"><button id="heart-continue-btn" onclick="navigateByHeartScore()" disabled>Continue Based on Score</button></div></div>
+            <div id="step-4c-delta-troponin-criteria" class="pathway-step"><h2>Step 4b: Evaluate initial and delta troponin (2 hour) to determine next step</h2><p>Which criteria do the hs-cTn results meet?</p><div class="options"><button onclick="navigateTo('outcome-discharge-14day')">Rapid Rule-Out<br><small>Initial < 3 ng/L AND Delta < 3 ng/L</small></button><button onclick="navigateTo('step-4d-heart-calculator')">Gray Zone<br><small>All Other Results</small></button><button onclick="navigateTo('step-4d-heart-calculator')">Myocardial Injury<br><small>Initial > 88 ng/L OR Delta ≥ 22 ng/L</small></button></div></div>
+            <div id="step-4d-heart-calculator" class="pathway-step"><h2>Step 4c: HEART Score Calculator</h2><p>Calculate the patient's HEART score to confirm disposition for the Gray Zone or Myocardial Injury pathways.</p><div class="calculator"><div class="calc-row"><label for="history">History</label><select id="history" onchange="calculateHeartScore()"><option value="0">Slightly suspicious</option><option value="1">Moderately suspicious</option><option value="2">Highly suspicious</option></select></div><div class="calc-row"><label for="ecg">ECG</label><select id="ecg" onchange="calculateHeartScore()"><option value="0">Normal</option><option value="1">Non-specific repolarization disturbance</option><option value="2">Significant ST deviation</option></select></div><div class="calc-row"><label for="age">Age</label><select id="age" onchange="calculateHeartScore()"><option value="0">< 45 years</option><option value="1">45-64 years</option><option value="2">≥ 65 years</option></select></div><div class="calc-row"><label for="risk">Risk Factors</label><select id="risk" onchange="calculateHeartScore()"><option value="0">No known risk factors</option><option value="1">1-2 risk factors</option><option value="2">≥ 3 risk factors or atherosclerotic disease</option></select></div><div class="calc-row"><label for="troponin">Troponin</label><select id="troponin" onchange="calculateHeartScore()"><option value="0">≤ Normal limit</option><option value="1">> 1x but < 3x normal limit</option><option value="2">≥ 3x normal limit</option></select></div></div><div id="score-display">Total Score: <span id="total-score">0</span></div><div class="options"><button id="heart-continue-btn" onclick="navigateByHeartScore()" disabled>Continue Based on Score</button></div></div>
             <div id="step-4e-shared-decision" class="pathway-step"><h2>Intermediate Risk Pathway</h2><p>The patient has an <strong>Intermediate Risk</strong> HEART score (4-6). Engage in Shared Decision Making about the next steps.</p><div class="options"><button onclick="navigateTo('outcome-discharge-14day')">Decision: Discharge</button><button onclick="navigateTo('step-5-obs-check')">Decision: Admit/Observe</button></div></div>
-            <div id="outcome-discharge-14day" class="pathway-step outcome-discharge"><h2>Outcome: Low Risk / Discharge</h2><p>Patient is low risk. <strong>Discharge home</strong> with Primary Care (PDC) follow-up within 14 days.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
+            
+            <!-- REVISED Discharge Outcome -->
+            <div id="outcome-discharge-14day" class="pathway-step outcome-discharge">
+                <h2>Outcome: Low Risk / Discharge</h2>
+                <p>Patient meets Rapid Rule-Out criteria. <strong>Discharge home</strong> with Primary Care (PDC) follow-up within 14 days.</p>
+                <div class="note">
+                    <strong>Final Discharge Considerations:</strong>
+                    <ul>
+                        <li>ED Clinical judgment</li>
+                        <li>Is chest pain improving or resolved?</li>
+                        <li>Is a repeat 2 hour ECG unchanged (no dynamic ECG changes)?</li>
+                    </ul>
+                    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 15px 0;">
+                    <strong>Documentation Reminder:</strong> Per protocol, a HEART score should still be documented for all chest pain patients, even those discharged via Rapid Rule-Out.
+                </div>
+                <div class="options">
+                    <button class="restart-btn" onclick="restart()">Restart Pathway</button>
+                </div>
+            </div>
+
             <div id="outcome-consult-cardiology" class="pathway-step outcome-admit"><h2>Outcome: High Risk</h2><p>Patient has a High Risk HEART score (≥7). <strong>Consult Cardiology fellow.</strong></p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
             <div id="step-5-obs-check" class="pathway-step"><h2>Step 5: Observation vs. Admission</h2><p>Is an <strong>ED Observation</strong> unit available?</p><div class="options"><button onclick="navigateTo('step-5a-obs-path')">Yes</button><button onclick="navigateTo('outcome-admit-medicine')">No</button></div></div>
             <div id="step-5a-obs-path" class="pathway-step outcome-observe"><h2>Action: Place in ED Observation</h2><p>The patient is placed in the observation unit. Has the patient had prior normal cardiac testing?</p><p class="note">(Normal LHC or CT Coronary <2 yrs, or normal stress test <1 yr)</p><div class="options"><button onclick="navigateTo('outcome-discharge-7day')">Yes</button><button onclick="navigateTo('step-5b-cta-check')">No</button></div></div>
@@ -171,10 +193,7 @@
         </div>
 
         <footer>
-            <p>
-                <!-- The direct link to your PDF is now included -->
-                <a href="https://raw.githubusercontent.com/praxeo/chest-pain-pathway-UED/main/ED%20Chest%20Pain%20Pathway%20Jun%202025.pdf" target="_blank" rel="noopener noreferrer">View Original PDF Pathway</a>
-            </p>
+            <p><a href="https://raw.githubusercontent.com/praxeo/chest-pain-pathway-UED/main/ED%20Chest%20Pain%20Pathway%20Jun%202025.pdf" target="_blank" rel="noopener noreferrer">View Original PDF Pathway</a></p>
             <p>This is an interactive tool based on the "ED Chest Pain Pathway" document. It is for educational and demonstrative purposes only and should not be used for clinical decision-making. Always refer to the official, approved hospital protocols.</p>
         </footer>
     </div>
@@ -190,7 +209,7 @@
             const currentStep = document.getElementById(stepId);
             if (currentStep) {
                 currentStep.style.display = 'block';
-                if (stepId === 'step-4e-heart-calculator') {
+                if (stepId === 'step-4d-heart-calculator') {
                     calculateHeartScore();
                 }
             }
