@@ -2,3 +2,357 @@
 
 the following is original code for extended pathway. Index.html will be updated to render only ED relevant pathway
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ED Chest Pain Pathway v8</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #app-container {
+            width: 100%;
+            max-width: 700px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+            text-align: center;
+        }
+        h1 {
+            color: #1A5632; /* UAB Green */
+            border-bottom: 3px solid #D1B464; /* UAB Gold */
+            padding-bottom: 15px;
+            margin-top: 0;
+            font-weight: 700;
+        }
+        #narrative-container {
+            display: none;
+            background-color: #eef2f5;
+            border: 1px solid #d6dde3;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        #narrative-container h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #1A5632;
+            font-size: 1.1em;
+        }
+        #narrative-list {
+            padding-left: 20px;
+            margin: 0;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        #narrative-list li {
+            margin-bottom: 5px;
+        }
+        .pathway-step {
+            display: none;
+            padding: 25px;
+            border: 1px solid #eef2f5;
+            border-radius: 8px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pathway-step h2 {
+            margin-top: 0;
+            color: #1A5632; /* UAB Green */
+            font-weight: 700;
+        }
+        .pathway-step p {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        .options {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        button {
+            background-color: #1A5632; /* UAB Green */
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            flex-grow: 1;
+            max-width: 320px;
+            line-height: 1.4;
+        }
+        button:hover {
+            background-color: #144529; /* Darker UAB Green */
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background-color: #cdd2d8;
+            cursor: not-allowed;
+            transform: none;
+        }
+        button small {
+            font-size: 0.8em;
+            font-weight: 400;
+            opacity: 0.9;
+            display: block;
+            margin-top: 4px;
+        }
+        button.restart-btn {
+            background-color: #6c757d;
+        }
+        button.restart-btn:hover {
+            background-color: #5a6268;
+        }
+        .outcome-discharge { background-color: #d1e7dd; border-color: #a3c9a8; } /* Light Green */
+        .outcome-admit { background-color: #f8d7da; border-color: #f5c6cb; } /* Standard Red */
+        .outcome-observe { background-color: #fff3cd; border-color: #ffeeba; } /* Light Gold/Yellow */
+        strong { color: #1a253c; }
+        .note {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            text-align: left;
+        }
+        .note ul { padding-left: 20px; margin: 10px 0 0 0; }
+        .note li { margin-bottom: 5px; }
+        footer { margin-top: 30px; font-size: 0.8em; color: #888; }
+        footer a { color: #1A5632; text-decoration: none; font-weight: 500; font-size: 1.1em; }
+        footer a:hover { text-decoration: underline; }
+
+        #nav-controls { margin-top: 25px; padding-top: 20px; border-top: 1px solid #eef2f5; }
+        #back-btn { background-color: #6c757d; max-width: 150px; }
+        #back-btn:hover { background-color: #5a6268; }
+        #back-btn:disabled { background-color: #e9ecef; }
+
+        .calculator { margin-top: 20px; text-align: left; }
+        .calc-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eef2f5; }
+        .calc-row label { font-weight: 500; }
+        .calc-row select { padding: 8px; border-radius: 4px; border: 1px solid #ced4da; width: 60%; font-family: 'Inter', sans-serif; }
+        #score-display { margin-top: 20px; font-size: 1.5em; font-weight: bold; }
+        #score-display span { display: inline-block; padding: 10px 20px; border-radius: 8px; color: #fff; }
+        .score-low { background-color: #1A5632; } /* UAB Green */
+        .score-intermediate { background-color: #D1B464; color: #333 !important;} /* UAB Gold */
+        .score-high { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <h1>ED Chest Pain Pathway</h1>
+        
+        <div id="narrative-container">
+            <h3>Clinical Summary</h3>
+            <ol id="narrative-list"></ol>
+        </div>
+
+        <div id="pathway-content">
+            
+            <div id="start-screen" class="pathway-step" style="display: block;"><h2>Welcome</h2><p>This tool guides you through the Emergency Department Chest Pain Pathway. Click below to begin.</p><div class="options"><button onclick="navigateTo('step-1', this)" data-narrative="Evaluation started for a patient presenting with chest pain.">Start Pathway</button></div></div>
+            <div id="step-1" class="pathway-step"><h2>Step 1: Patient Arrival & Initial ECG</h2><p>A patient presents to the ED with chest pain. An initial ECG is performed.</p><div class="options"><button onclick="navigateTo('step-2-stemi', this)" data-narrative="Initial ECG performed for evaluation.">Evaluate ECG</button></div></div>
+            <div id="step-2-stemi" class="pathway-step"><h2>Step 2: STEMI Evaluation</h2><p>Does the initial ECG meet <strong>STEMI criteria</strong>?</p><div class="options"><button onclick="navigateTo('outcome-stemi-positive', this)" data-narrative="ECG meets STEMI criteria.">Yes</button><button onclick="navigateTo('step-3-ischemia', this)" data-narrative="ECG does not meet STEMI criteria.">No</button></div></div>
+            <div id="outcome-stemi-positive" class="pathway-step outcome-admit"><h2>Outcome: STEMI Positive</h2><p>Activate the <strong>STEMI protocol</strong> and follow the 2013 ACC/AHA STEMI Guidelines.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
+            <div id="step-3-ischemia" class="pathway-step"><h2>Step 3: Evaluate for Non-STEMI Ischemic Changes</h2><p>Does the ECG show any of the following <strong>high-risk ischemic changes</strong>?</p><div class="options"><button onclick="navigateTo('step-3-action', this)" data-narrative="ECG shows high-risk ischemic changes.">Yes</button><button onclick="navigateTo('step-4-main-pathway-entry', this)" data-narrative="ECG is non-ischemic or shows only non-high-risk changes.">No</button></div><div class="note"><strong>High-Risk Ischemic Changes:</strong><ul><li>Transient ST changes (≥0.5 mm, horizontal or downsloping) during symptoms.</li><li>Marked symmetrical precordial T-wave inversion (≥2 mm).</li></ul></div></div>
+            <div id="step-3-action" class="pathway-step"><h2>Action: High-Risk ECG Findings</h2><p>The patient has new or concerning ECG findings. The following immediate actions are required while proceeding with the evaluation.</p><div class="note"><ul><li>Place patient in a monitored treatment space.</li><li>Obtain initial high-sensitivity troponin (hs-cTn).</li><li>Repeat ECG in 15-30 minutes (or with any change in symptoms).</li><li>Initiate standard evaluation and treatment (e.g., Aspirin).</li></ul></div><div class="options"><button onclick="navigateTo('step-3a-nstemi-check', this)" data-narrative="Patient placed in treatment space for further evaluation due to high-risk ECG.">Continue Evaluation</button></div></div>
+            <div id="step-3a-nstemi-check" class="pathway-step"><h2>High-Risk Pathway: NSTE-ACS Evaluation</h2><p>The ECG is concerning. Are the patient's symptoms also suggestive of a <strong>NSTE-ACS</strong>?</p><div class="options"><button onclick="navigateTo('step-3b-hemodynamic-check', this)" data-narrative="Clinical picture is suggestive of NSTE-ACS.">Yes</button><button onclick="navigateTo('outcome-other-diagnoses', this)" data-narrative="Clinical picture is not suggestive of NSTE-ACS; considering other diagnoses.">No</button></div></div>
+            <div id="step-3b-hemodynamic-check" class="pathway-step"><h2>High-Risk Pathway: Hemodynamic Stability</h2><p>After initiating NSTE-ACS workup, first assess for hemodynamic instability. Does the patient have any signs of <strong>hemodynamic instability</strong>?</p><div class="options"><button onclick="navigateTo('outcome-admit-nstemi', this)" data-narrative="Patient is hemodynamically unstable.">Yes</button><button onclick="navigateTo('step-3c-troponin-check', this)" data-narrative="Patient is hemodynamically stable.">No</button></div><div class="note"><strong>Examples of Hemodynamic Instability:</strong><ul><li>Hypotension (Systolic BP < 90, MAP < 65)</li><li>Tachypnea (RR > 30)</li><li>Increased work of breathing (e.g., sweating, sitting up)</li></ul></div></div>
+            <div id="step-3c-troponin-check" class="pathway-step"><h2>High-Risk Pathway: Troponin Evaluation</h2><p>Is the high-sensitivity troponin (hs-cTn) <strong>elevated</strong> on the initial or 2-hour repeat draw?</p><div class="options"><button onclick="navigateTo('outcome-admit-nstemi', this)" data-narrative="Serial hs-cTn is elevated.">Yes (hs-cTn Elevated)</button><button onclick="navigateTo('step-3d-final-check', this)" data-narrative="Serial hs-cTn remains normal.">No (hs-cTn Normal)</button></div></div>
+            <div id="step-3d-final-check" class="pathway-step"><h2>High-Risk Pathway: Final Safety Check</h2><p>With normal troponins, confirm the patient is stable for potential transition to the main pathway. Are <strong>ALL</strong> of the following true?</p><div class="note"><ul><li>Repeat ECG is unchanged or improved.</li><li>Chest pain is resolved.</li><li>2-hour hs-cTn is negative/normal.</li></ul></div><div class="options"><button onclick="navigateTo('step-5-obs-check', this)" data-narrative="Patient is stable: chest pain resolved, ECGs stable, troponins negative.">Yes, All Are True</button><button onclick="navigateTo('outcome-admit-nstemi', this)" data-narrative="Patient remains unstable: ongoing symptoms or dynamic ECG changes.">No, At Least One Is Not True</button></div></div>
+            <div id="outcome-other-diagnoses" class="pathway-step outcome-observe"><h2>Outcome: Consider Other Diagnoses</h2><p>Work up other causes of chest pain with ischemic ECG changes (PE, dissection, pericarditis, sepsis, etc.).</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
+            <div id="outcome-admit-nstemi" class="pathway-step outcome-admit"><h2>Outcome: High-Risk NSTE-ACS</h2><p>Patient is high-risk due to hemodynamic instability, elevated troponin, or ongoing signs/symptoms. <strong>Consult Cardiology fellow</strong> for recommendations, consideration of LHC/PCI, and subsequent admission.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
+            <div id="step-4-main-pathway-entry" class="pathway-step"><h2>Step 4: Main Clinical Decision Pathway</h2><p>The patient has no STEMI and no other concerning ischemic ECG changes. They are a candidate for the main pathway using hs-cTn and the HEART Score.</p><div class="options"><button onclick="navigateTo('step-4a-symptom-onset', this)" data-narrative="Patient is eligible for the main clinical decision pathway.">Begin Stratification</button></div></div>
+            <div id="step-4a-symptom-onset" class="pathway-step"><h2>Step 4a: Symptom Onset</h2><p>Did symptoms start <strong>≥ 3 hours</strong> before the initial hs-cTn was drawn?</p><div class="options"><button onclick="navigateTo('step-4b-single-draw', this)" data-narrative="Symptom onset was ≥ 3 hours prior to initial troponin draw.">Yes (≥ 3 hours)</button><button onclick="navigateTo('step-4c-delta-troponin-criteria', this)" data-narrative="Symptom onset was < 3 hours prior to initial troponin draw; proceeding with 2-hour delta.">No (< 3 hours) - Proceed to Delta Troponin Pathway</button></div></div>
+            <div id="step-4b-single-draw" class="pathway-step"><h2>Single-Draw Pathway</h2><p>Is the initial hs-cTn <strong>< 3 ng/L</strong>?</p><div class="options"><button onclick="navigateTo('outcome-discharge-14day', this)" data-narrative="Initial hs-cTn is < 3 ng/L, meeting single-draw rule-out criteria.">Yes (hs-cTn < 3)</button><button onclick="navigateTo('step-4c-delta-troponin-criteria', this)" data-narrative="Initial hs-cTn is ≥ 3 ng/L, failing single-draw rule-out. Proceeding with 2-hour delta.">No (hs-cTn ≥ 3) - Proceed to Delta Troponin Pathway</button></div></div>
+            <div id="step-4c-delta-troponin-criteria" class="pathway-step"><h2>Step 4b: Evaluate hs-cTn Results</h2><p>Which criteria do the initial and 2-hour delta hs-cTn results meet?</p><div class="options"><button onclick="navigateTo('outcome-discharge-14day', this)" data-narrative="hs-cTn results meet Rapid Rule-Out criteria.">Rapid Rule-Out<br><small>Initial < 3 ng/L AND Delta < 3 ng/L</small></button><button onclick="navigateTo('step-4d-heart-calculator', this)" data-narrative="hs-cTn results are in the 'Gray Zone'.">Gray Zone<br><small>All Other Results</small></button><button onclick="navigateTo('step-4c-nstemi-check', this)" data-narrative="hs-cTn results indicate Myocardial Injury.">Myocardial Injury<br><small>Initial > 88 ng/L OR Delta ≥ 22 ng/L</small></button></div></div>
+            <div id="step-4c-nstemi-check" class="pathway-step"><h2>Myocardial Injury: Evaluate Cause</h2><p>The troponin is significantly elevated. Does the clinical picture suggest this is a <strong>primary Type 1 NSTEMI</strong>?</p><div class="options"><button onclick="navigateTo('outcome-consult-cardiology-nstemi', this)" data-narrative="Clinical picture suggests a primary Type 1 NSTEMI.">Yes</button><button onclick="navigateTo('outcome-admit-medicine-injury', this)" data-narrative="Clinical picture suggests undifferentiated myocardial injury (not Type 1 NSTEMI).">No</button></div></div>
+            <div id="outcome-consult-cardiology-nstemi" class="pathway-step outcome-admit"><h2>Outcome: Consult Cardiology for NSTEMI</h2><p>Patient has findings concerning for a Type 1 NSTEMI. <strong>Consult Cardiology fellow</strong> for recommendations and admission.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
+            <div id="outcome-admit-medicine-injury" class="pathway-step outcome-admit"><h2>Outcome: Admit for Undifferentiated Injury</h2><p>Patient has undifferentiated myocardial injury not felt to be a primary Type 1 NSTEMI. <strong>Consult Medicine for admission</strong> and further workup.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
+            <div id="step-4d-heart-calculator" class="pathway-step"><h2>Step 4c: HEART Score Calculator</h2><p>Calculate the patient's HEART score to determine disposition for the Gray Zone.</p><div class="calculator"><div class="calc-row"><label for="history">History</label><select id="history" onchange="calculateHeartScore()"><option value="0">Slightly suspicious</option><option value="1">Moderately suspicious</option><option value="2">Highly suspicious</option></select></div><div class="calc-row"><label for="ecg">ECG</label><select id="ecg" onchange="calculateHeartScore()"><option value="0">Normal</option><option value="1">Non-specific repolarization disturbance</option><option value="2">Significant ST deviation</option></select></div><div class="calc-row"><label for="age">Age</label><select id="age" onchange="calculateHeartScore()"><option value="0">< 45 years</option><option value="1">45-64 years</option><option value="2">≥ 65 years</option></select></div><div class="calc-row"><label for="risk">Risk Factors</label><select id="risk" onchange="calculateHeartScore()"><option value="0">No known risk factors</option><option value="1">1-2 risk factors</option><option value="2">≥ 3 risk factors or atherosclerotic disease</option></select></div><div class="calc-row"><label for="troponin">Troponin</label><select id="troponin" onchange="calculateHeartScore()"><option value="0">≤ Normal limit</option><option value="1">> 1x but < 3x normal limit</option><option value="2">≥ 3x normal limit</option></select></div></div><div id="score-display">Total Score: <span id="total-score">0</span></div><div class="options"><button id="heart-continue-btn" onclick="navigateByHeartScore()" disabled>Continue Based on Score</button></div></div>
+            <div id="step-4e-shared-decision" class="pathway-step"><h2>Intermediate Risk Pathway (HEART 4-6)</h2><p>The patient has an <strong>Intermediate Risk</strong> HEART score. Engage in Shared Decision Making about the next steps.</p><div class="options"><button onclick="navigateTo('outcome-discharge-7day-sdm', this)" data-narrative="Shared decision made to discharge patient with 7-day follow-up.">Decision: Discharge</button><button onclick="navigateTo('step-5-obs-check', this)" data-narrative="Shared decision made to admit/observe patient.">Decision: Admit/Observe</button></div></div>
+            <div id="step-4f-high-risk-heart" class="pathway-step"><h2>High Risk Pathway (HEART ≥7)</h2><p>The patient has a <strong>High Risk</strong> HEART score. Proceed to determine disposition (Observation vs. Admission).</p><div class="options"><button onclick="navigateTo('step-5-obs-check', this)" data-narrative="Patient has a high-risk HEART score; proceeding to determine disposition.">Determine Disposition</button></div></div>
+            
+            <!-- NEW/MODIFIED DISCHARGE OUTCOMES -->
+            <div id="outcome-discharge-14day" class="pathway-step outcome-discharge">
+                <h2>Outcome: Low-Risk / Rapid Rule-Out Discharge</h2>
+                <p>Patient meets low-risk criteria. <strong>Discharge home</strong> with Primary Care (PDC) follow-up within <strong>14 days</strong>.</p>
+                <div class="note"><strong>Final Discharge Considerations:</strong><ul><li>ED Clinical judgment (consider other etiologies) </li><li>Is chest pain improving or resolved?</li><li>Is a repeat 2 hour ECG unchanged?</li></ul><hr style="border: none; border-top: 1px solid #e0e0e0; margin: 15px 0;"><strong>Documentation Reminder:</strong> A HEART score should be documented for all chest pain patients.</div>
+                <div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div>
+            </div>
+            <div id="outcome-discharge-7day-sdm" class="pathway-step outcome-discharge">
+                <h2>Outcome: Discharge via Shared Decision</h2>
+                <p>Patient is intermediate-risk and a shared decision was made to discharge. <strong>Discharge home</strong> with Primary Care (PDC) follow-up within <strong>7 days</strong>.</p>
+                <div class="note"><strong>Final Discharge Considerations:</strong><ul><li>ED Clinical judgment (consider other etiologies) </li><li>Is chest pain improving or resolved?</li><li>Is a repeat 2 hour ECG unchanged?</li></ul></div>
+                <div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div>
+            </div>
+            
+            <div id="step-5-obs-check" class="pathway-step"><h2>Step 5: Observation vs. Admission</h2><p>This patient is a candidate for either observation or admission. Is an <strong>ED Observation</strong> unit available?</p><div class="options"><button onclick="navigateTo('step-5a-obs-path', this)" data-narrative="ED Observation unit is available.">Yes</button><button onclick="navigateTo('outcome-admit-medicine', this)" data-narrative="ED Observation unit is not available.">No</button></div></div>
+            <div id="step-5a-obs-path" class="pathway-step outcome-observe"><h2>Action: Place in ED Observation</h2><p>The patient is placed in the observation unit. Has the patient had prior normal cardiac testing?</p><p class="note">(Normal LHC or CT Coronary <2 yrs, or normal stress test <1 yr)</p><div class="options"><button onclick="navigateTo('outcome-discharge-7day', this)" data-narrative="Patient placed in observation and has had recent normal cardiac testing.">Yes</button><button onclick="navigateTo('step-5b-cta-check', this)" data-narrative="Patient placed in observation and requires further testing.">No</button></div></div>
+            <div id="outcome-admit-medicine" class="pathway-step outcome-admit"><h2>Outcome: Admit to Medicine</h2><p>The patient is admitted to the hospital medicine service.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
+            <div id="outcome-discharge-7day" class="pathway-step outcome-discharge"><h2>Outcome: Discharge from Observation</h2><p><strong>Discharge home</strong> with PDC follow-up within 7 days.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
+            <div id="step-5b-cta-check" class="pathway-step"><h2>Step 5: CTA Candidacy</h2><p>Is the patient a candidate for a <strong>Coronary CTA</strong>?</p><p class="note">(Criteria: No known CAD, <65 yrs, no contrast allergy, can stay for scan, etc.)</p><div class="options"><button onclick="navigateTo('step-5c-cta-path', this)" data-narrative="Patient is a candidate for Coronary CTA.">Yes</button><button onclick="navigateTo('outcome-other-testing', this)" data-narrative="Patient is not a candidate for Coronary CTA.">No</button></div></div>
+            <div id="step-5c-cta-path" class="pathway-step outcome-observe"><h2>Action: Coronary CTA</h2><p>Order Coronary CTA after Cardiology approval. What are the results?</p><div class="options"><button onclick="navigateTo('outcome-discharge-7day', this)" data-narrative="Coronary CTA is normal.">Normal / No CAD</button><button onclick="navigateTo('step-5d-abnormal-cta', this)" data-narrative="Coronary CTA is abnormal.">Abnormal</button></div></div>
+            <div id="outcome-other-testing" class="pathway-step outcome-observe"><h2>Action: Consider Other Testing</h2><p>Patient is not a CTA candidate. Consider non-invasive stress testing if the last test was >12 months ago.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
+            <div id="step-5d-abnormal-cta" class="pathway-step"><h2>Abnormal CTA Result</h2><p>Formal Cardiology consult is required. Is further inpatient evaluation or intervention recommended by Cardiology?</p><div class="options"><button onclick="navigateTo('outcome-admit-medicine', this)" data-narrative="Cardiology recommends admission after abnormal CTA.">Yes, Admit</button><button onclick="navigateTo('outcome-discharge-7day', this)" data-narrative="Cardiology recommends discharge with outpatient follow-up after abnormal CTA.">No, Discharge</button></div></div>
+
+        </div>
+
+        <div id="nav-controls">
+            <button id="back-btn" onclick="goBack()" disabled>Back</button>
+        </div>
+
+        <footer>
+            <p><a href="https://raw.githubusercontent.com/praxeo/chest-pain-pathway-UED/main/ED%20Chest%20Pain%20Pathway%20Jun%202025.pdf" target="_blank" rel="noopener noreferrer">View Original PDF Pathway</a></p>
+            <p>This is an interactive tool based on the "ED Chest Pain Pathway" document. It is for educational and demonstrative purposes only and should not be used for clinical decision-making. Always refer to the official, approved hospital protocols.</p>
+        </footer>
+    </div>
+
+    <script>
+        let currentHeartScore = 0;
+        let navigationHistory = ['start-screen'];
+        let narrativeSteps = [];
+
+        function updateNarrative(phrase) {
+            if (phrase) {
+                narrativeSteps.push(phrase);
+            }
+
+            const narrativeContainer = document.getElementById('narrative-container');
+            const narrativeList = document.getElementById('narrative-list');
+            
+            if (narrativeSteps.length > 0) {
+                narrativeContainer.style.display = 'block';
+            } else {
+                narrativeContainer.style.display = 'none';
+            }
+
+            narrativeList.innerHTML = '';
+            narrativeSteps.forEach(step => {
+                const li = document.createElement('li');
+                li.textContent = step;
+                narrativeList.appendChild(li);
+            });
+        }
+
+        function displayStep(stepId) {
+            document.querySelectorAll('.pathway-step').forEach(step => {
+                step.style.display = 'none';
+            });
+            const currentStep = document.getElementById(stepId);
+            if (currentStep) {
+                currentStep.style.display = 'block';
+                if (stepId === 'step-4d-heart-calculator') {
+                    calculateHeartScore();
+                }
+            }
+            updateNavButtons();
+        }
+
+        function navigateTo(stepId, element) {
+            if (navigationHistory[navigationHistory.length - 1] !== stepId) {
+                navigationHistory.push(stepId);
+            }
+            if (element) {
+                const narrativePhrase = element.getAttribute('data-narrative');
+                updateNarrative(narrativePhrase);
+            }
+            displayStep(stepId);
+        }
+
+        function goBack() {
+            if (navigationHistory.length > 1) {
+                navigationHistory.pop();
+                narrativeSteps.pop();
+                updateNarrative(null);
+                const previousStepId = navigationHistory[navigationHistory.length - 1];
+                displayStep(previousStepId);
+            }
+        }
+        
+        function restart() {
+            navigationHistory = ['start-screen'];
+            narrativeSteps = [];
+            updateNarrative(null);
+            displayStep('start-screen');
+        }
+
+        function updateNavButtons() {
+            const backBtn = document.getElementById('back-btn');
+            backBtn.disabled = navigationHistory.length <= 1;
+        }
+
+        function calculateHeartScore() {
+            const history = parseInt(document.getElementById('history').value);
+            const ecg = parseInt(document.getElementById('ecg').value);
+            const age = parseInt(document.getElementById('age').value);
+            const risk = parseInt(document.getElementById('risk').value);
+            const troponin = parseInt(document.getElementById('troponin').value);
+            
+            currentHeartScore = history + ecg + age + risk + troponin;
+            
+            const scoreSpan = document.getElementById('total-score');
+            scoreSpan.textContent = currentHeartScore;
+
+            scoreSpan.classList.remove('score-low', 'score-intermediate', 'score-high');
+
+            if (currentHeartScore <= 3) {
+                scoreSpan.classList.add('score-low');
+            } else if (currentHeartScore >= 4 && currentHeartScore <= 6) {
+                scoreSpan.classList.add('score-intermediate');
+            } else {
+                scoreSpan.classList.add('score-high');
+            }
+            
+            document.getElementById('heart-continue-btn').disabled = false;
+        }
+        
+        function navigateByHeartScore() {
+            let riskCategory = '';
+            let nextStep = '';
+
+            if (currentHeartScore <= 3) {
+                riskCategory = 'Low Risk';
+                nextStep = 'outcome-discharge-14day';
+            } else if (currentHeartScore >= 4 && currentHeartScore <= 6) {
+                riskCategory = 'Intermediate Risk';
+                nextStep = 'step-4e-shared-decision';
+            } else {
+                riskCategory = 'High Risk';
+                nextStep = 'step-4f-high-risk-heart';
+            }
+            
+            const narrativePhrase = `Calculated HEART score is ${currentHeartScore} (${riskCategory}).`;
+            // We pass null for the element because we are generating the narrative dynamically here
+            navigateTo(nextStep, { getAttribute: () => narrativePhrase });
+        }
+        
+        displayStep('start-screen');
+    </script>
+
+</body>
+</html>
