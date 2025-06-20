@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ED Chest Pain Pathway v9.1 (ED Focus)</title>
+    <title>ED Chest Pain Pathway v9.2 (ED Focus)</title>
     <style>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -180,10 +180,10 @@
             <div id="step-3b-hemodynamic-check" class="pathway-step"><h2>High-Risk Pathway: Hemodynamic Stability</h2><p>After initiating NSTE-ACS workup, first assess for hemodynamic instability. Does the patient have any signs of <strong>hemodynamic instability</strong>?</p><div class="options"><button onclick="navigateTo('outcome-admit-nstemi', this)" data-narrative="Patient is hemodynamically unstable.">Yes</button><button onclick="navigateTo('step-3c-troponin-check', this)" data-narrative="Patient is hemodynamically stable.">No</button></div><div class="note"><strong>Examples of Hemodynamic Instability:</strong><ul><li>Hypotension (Systolic BP < 90, MAP < 65)</li><li>Tachypnea (RR > 30)</li><li>Increased work of breathing (e.g., sweating, sitting up)</li></ul></div></div>
             <div id="step-3c-troponin-check" class="pathway-step"><h2>High-Risk Pathway: Troponin Evaluation</h2><p>Is the high-sensitivity troponin (hs-cTn) <strong>elevated</strong> on the initial or 2-hour repeat draw?</p><div class="options"><button onclick="navigateTo('outcome-admit-nstemi', this)" data-narrative="Serial hs-cTn is elevated.">Yes (hs-cTn Elevated)</button><button onclick="navigateTo('step-3d-final-check', this)" data-narrative="Serial hs-cTn remains normal.">No (hs-cTn Normal)</button></div></div>
             
-            <!-- *** MODIFIED STEP *** -->
+            <!-- *** MODIFIED STEP 3D *** -->
             <div id="step-3d-final-check" class="pathway-step">
                 <h2>High-Risk Pathway: Final Safety Check</h2>
-                <p>Despite the initial high-risk ECG, the troponins are negative. Is the patient now clinically stable and safe for an Observation-level disposition (vs. immediate admission)?</p>
+                <p>Despite the initial high-risk ECG, the troponins are negative. Is the patient now clinically stable?</p>
                 <div class="note"><strong>Confirm ALL of the following are true:</strong>
                     <ul>
                         <li>Repeat ECG is unchanged or improved.</li>
@@ -192,7 +192,7 @@
                     </ul>
                 </div>
                 <div class="options">
-                    <button onclick="navigateTo('outcome-observe', this)" data-narrative="Patient is now stable, but requires Observation due to initial high-risk features.">Yes, All Are True (Place in Obs)</button>
+                    <button onclick="navigateTo('step-5-obs-check', this)" data-narrative="Patient is now stable but requires further evaluation due to initial high-risk features.">Yes, All Are True</button>
                     <button onclick="navigateTo('outcome-admit-nstemi', this)" data-narrative="Patient remains unstable: ongoing symptoms or dynamic ECG changes despite normal troponins.">No, At Least One Is Not True (Admit)</button>
                 </div>
             </div>
@@ -207,15 +207,37 @@
             <div id="outcome-consult-cardiology-nstemi" class="pathway-step outcome-admit"><h2>Outcome: Consult Cardiology for NSTEMI</h2><p>Patient has findings concerning for a Type 1 NSTEMI. <strong>Consult Cardiology fellow</strong> for recommendations and admission.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
             <div id="outcome-admit-medicine-injury" class="pathway-step outcome-admit"><h2>Outcome: Admit for Undifferentiated Injury</h2><p>Patient has undifferentiated myocardial injury not felt to be a primary Type 1 NSTEMI. <strong>Consult Medicine for admission</strong> and further workup.</p><div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div></div>
             <div id="step-4d-heart-calculator" class="pathway-step"><h2>Step 4c: HEART Score Calculator</h2><p>Calculate the patient's HEART score to determine disposition for the Gray Zone.</p><div class="calculator"><div class="calc-row"><label for="history">History</label><select id="history" onchange="calculateHeartScore()"><option value="0">Slightly suspicious</option><option value="1">Moderately suspicious</option><option value="2">Highly suspicious</option></select></div><div class="calc-row"><label for="ecg">ECG</label><select id="ecg" onchange="calculateHeartScore()"><option value="0">Normal</option><option value="1">Non-specific repolarization disturbance</option><option value="2">Significant ST deviation</option></select></div><div class="calc-row"><label for="age">Age</label><select id="age" onchange="calculateHeartScore()"><option value="0">< 45 years</option><option value="1">45-64 years</option><option value="2">≥ 65 years</option></select></div><div class="calc-row"><label for="risk">Risk Factors</label><select id="risk" onchange="calculateHeartScore()"><option value="0">No known risk factors</option><option value="1">1-2 risk factors</option><option value="2">≥ 3 risk factors or atherosclerotic disease</option></select></div><div class="calc-row"><label for="troponin">Troponin</label><select id="troponin" onchange="calculateHeartScore()"><option value="0">≤ Normal limit</option><option value="1">> 1x but < 3x normal limit</option><option value="2">≥ 3x normal limit</option></select></div></div><div id="score-display">Total Score: <span id="total-score">0</span></div><div class="options"><button id="heart-continue-btn" onclick="navigateByHeartScore()" disabled>Continue Based on Score</button></div></div>
-            <div id="step-4e-shared-decision" class="pathway-step"><h2>Intermediate Risk Pathway (HEART 4-6)</h2><p>The patient has an <strong>Intermediate Risk</strong> HEART score. Engage in Shared Decision Making about the next steps.</p><div class="options"><button onclick="navigateTo('outcome-discharge-7day-sdm', this)" data-narrative="Shared decision made to discharge patient with 7-day follow-up.">Decision: Discharge</button><button onclick="navigateTo('outcome-observe', this)" data-narrative="Shared decision made to place patient in Observation.">Decision: Place in Observation</button></div></div>
-            <div id="step-4f-high-risk-heart" class="pathway-step">
-                <h2>High Risk Pathway (HEART ≥7)</h2>
-                <p>The patient has a <strong>High Risk</strong> HEART score. Select the appropriate final disposition.</p>
+            
+            <!-- *** MODIFIED STEP 4E *** -->
+            <div id="step-4e-shared-decision" class="pathway-step">
+                <h2>Intermediate Risk Pathway (HEART 4-6)</h2>
+                <p>The patient has an <strong>Intermediate Risk</strong> HEART score. Engage in Shared Decision Making about the next steps.</p>
                 <div class="options">
-                    <button onclick="navigateTo('outcome-observe', this)" data-narrative="Patient has a high-risk HEART score; disposition is Observation.">Place in Observation</button>
-                    <button onclick="navigateTo('outcome-admit-medicine', this)" data-narrative="Patient has a high-risk HEART score; disposition is Admission to Medicine.">Admit to Medicine</button>
+                    <button onclick="navigateTo('outcome-discharge-7day-sdm', this)" data-narrative="Shared decision made to discharge patient with 7-day follow-up.">Decision: Discharge</button>
+                    <button onclick="navigateTo('step-5-obs-check', this)" data-narrative="Shared decision made to pursue observation/admission.">Decision: Admit/Observe</button>
                 </div>
             </div>
+            
+            <!-- *** MODIFIED STEP 4F *** -->
+            <div id="step-4f-high-risk-heart" class="pathway-step">
+                <h2>High Risk Pathway (HEART ≥7)</h2>
+                <p>The patient has a <strong>High Risk</strong> HEART score and requires either observation or admission.</p>
+                <div class="options">
+                    <button onclick="navigateTo('step-5-obs-check', this)" data-narrative="Patient has a high-risk HEART score; proceeding to determine disposition.">Determine Disposition</button>
+                </div>
+            </div>
+            
+            <!-- *** NEW GATEKEEPER STEP 5 *** -->
+            <div id="step-5-obs-check" class="pathway-step">
+                <h2>Step 5: Disposition Planning</h2>
+                <p>This patient requires further evaluation beyond the initial ED workup. Is an <strong>ED Observation</strong> unit available for this patient?</p>
+                <div class="options">
+                    <button onclick="navigateTo('outcome-observe', this)" data-narrative="ED Observation unit is available; patient placed in observation.">Yes, Place in Observation</button>
+                    <button onclick="navigateTo('outcome-admit-medicine', this)" data-narrative="ED Observation unit is not available; patient admitted to Medicine.">No, Admit to Medicine</button>
+                </div>
+            </div>
+
+            <!-- DISCHARGE OUTCOMES -->
             <div id="outcome-discharge-14day" class="pathway-step outcome-discharge">
                 <h2>Outcome: Low-Risk / Rapid Rule-Out Discharge</h2>
                 <p>Patient meets low-risk criteria. <strong>Discharge home</strong> with Primary Care (PDC) follow-up within <strong>14 days</strong>.</p>
@@ -228,6 +250,8 @@
                 <div class="note"><strong>Final Discharge Considerations:</strong><ul><li>ED Clinical judgment (consider other etiologies) </li><li>Is chest pain improving or resolved?</li><li>Is a repeat 2 hour ECG unchanged?</li></ul></div>
                 <div class="options"><button class="restart-btn" onclick="restart()">Restart Pathway</button></div>
             </div>
+            
+            <!-- FINAL OUTCOMES FOR OBS/ADMIT -->
             <div id="outcome-observe" class="pathway-step outcome-observe">
                 <h2>Outcome: Place in ED Observation</h2>
                 <p>The patient meets criteria for observation status. Initiate the ED Observation protocol for further monitoring and/or non-invasive testing as per unit guidelines.</p>
